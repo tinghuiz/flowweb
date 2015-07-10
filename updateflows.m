@@ -4,7 +4,7 @@ function [pairvx, pairvy] = updateflows(pairvx, pairvy, priorScores, ...
 %% Sort the priority queue
 N = sqrt(size(pairvx, 2));
 M = size(pairvx, 1);
-H = params.imgHeight;
+H = params.height;
 numKeep = round(M * params.proposalRate);
 updateQueue = zeros((N^2-N)/2 * numKeep, 5);
 

@@ -1,5 +1,5 @@
 class = 'car';
-setid = 2;
+setid = 100;
 baseDir = 'pascal/';
 
 setup;
