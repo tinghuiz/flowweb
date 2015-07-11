@@ -10,6 +10,9 @@ initDir = [baseDir '/results/' imgset '/dsp/'];
 if ~exist(resDir, 'dir')
     mkdir(resDir);
 end
+if gpu > 0
+    g = gpuDevice(gpu);
+end
 
 %% Set parameters
 params = [];
@@ -31,8 +34,11 @@ params.convergeThresh = 0.03;
 params.filterSpatialSigma = 0.05;
 % How much cycle consistency affects in the filtering/intra-image phase
 params.filterCycleSigma = 0.05;
+% Determines how many flows are filtered during intra-image phase. Only
+% flows of relatively low cycle-consistency are filtered
+params.filterRate = 0.5;
 % Threshold for non-zero spatial weights in the filtering/intra-image phase
-params.spatialWeightThresh = 0.001;
+params.spatialWeightThresh = 0.0001;
 % Regularization towards the initial solution
 params.lambda = 0.0;
 params.resDir = resDir;

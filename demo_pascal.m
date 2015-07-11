@@ -1,6 +1,7 @@
-class = 'car';
-setid = 100;
+% class = 'car';
+% setid = 100;
 baseDir = 'pascal/';
+gpu = 1;
 
 setup;
 ims = loadImageSet(imgDir);

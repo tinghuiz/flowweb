@@ -12,7 +12,12 @@ epsilon = params.cycleThresh * max([H, W]);
 initvx = pairvx;
 initvy = pairvy;
 
-[nbInds, nbWeights] = setupSpatialFilter(params);
+spatialWeights = pdist2([gx(:), gy(:)], [gx(:), gy(:)]);
+spatialSigma = params.filterSpatialSigma * max([H, W]);
+spatialWeights = exp(-spatialWeights/spatialSigma);
+spatialWeights = single(spatialWeights);
+spatialWeights(spatialWeights < 1e-3) = 0;
+% [nbInds, nbWeights] = setupSpatialFilter(params);
 
 iter = 1;
 while 1
@@ -60,7 +65,9 @@ while 1
     % Prune cycle_set with prune_mask
     cycleSet = cycleSet .* repmat(~pruneMask, [1, 1, N]);
     fprintf('Consistency-weighted filtering...\n');
-    [pairvx, pairvy] = cyclefilter(pairvx, pairvy, cycleSet, nbInds, nbWeights, initvx, initvy, H, W, params);
+    [pairvx, pairvy] = cyclefilter(pairvx, pairvy, cycleSet, ...
+        spatialWeights, params, true);
+%     [pairvx, pairvy] = cyclefilter(pairvx, pairvy, cycleSet, nbInds, nbWeights, initvx, initvy, H, W, params);
     if params.saveEveryIter
         pvx = pairvx;
         pvy = pairvy;
