@@ -34,6 +34,6 @@ params.filterCycleSigma = 0.05;
 % Threshold for non-zero spatial weights in the filtering/intra-image phase
 params.spatialWeightThresh = 0.001;
 % Regularization towards the initial solution
-params.lambda = 0.01;
+params.lambda = 0.0;
 params.resDir = resDir;
 params.saveEveryIter = true;

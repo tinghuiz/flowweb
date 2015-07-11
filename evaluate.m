@@ -9,8 +9,8 @@ end
 
 function [pckMean, pckAll] = pck(pairvx, pairvy, annos, params)
 N = params.numImage;
-W = params.imgWidth;
-H = params.imgHeight;
+W = params.width;
+H = params.height;
 thresh = params.alpha * max([W, H]);
 pcnt = 0;
 pckAll = zeros(N, N);
@@ -47,8 +47,8 @@ pckMean = sum(pckAll(:))/pcnt;
 
 function [iouMean, iouAll] = partIOU(pairvx, pairvy, annos, params)
 N = params.numImage;
-W = params.imgWidth;
-H = params.imgHeight;
+W = params.width;
+H = params.height;
 iouAll = zeros(N, N);
 for src = 1 : N
     fprintf('Eval parts: %d/%d\n', src, N);
@@ -60,16 +60,17 @@ for src = 1 : N
         iouParts = [];
         for sp = 1 : length(annos{src}.parts)
             for tp = 1 : length(annos{tgt}.parts)
-                if strcmp(annos{tgt}.parts(tp).partName, ...
-                        annos{src}.parts(sp).partName)
+                if strcmp(annos{tgt}.parts(tp).part_name, ...
+                        annos{src}.parts(sp).part_name)
                     tgtMask = annos{tgt}.parts(tp).mask;
                     srcMask = annos{src}.parts(sp).mask;
                     [warpTgtMask, ~] = warpImage(single(tgtMask), ...
-                        pairvx{src, tgt}, pairvy{src, tgt});
+                        single(pairvx{src, tgt}), ...
+                        single(pairvy{src, tgt}));
                     warpTgtMask(isnan(warpTgtMask)) = 0;
                     union = sum(sum(warpTgtMask | srcMask));
                     inter = sum(sum(warpTgtMask & srcMask));
-                    iouParts = [iou; inter/(union + eps)];
+                    iouParts = [iouParts; inter/(union + eps)];
                     unionParts = [unionParts; union];
                 end
             end

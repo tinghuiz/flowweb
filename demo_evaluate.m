@@ -1,6 +1,7 @@
-metric = 'keypoint';
-class = 'car';
-setid = 2;
+% metric = 'keypoint';
+% class = 'car';
+% setid = 2;
+% method = 'dsp';
 baseDir = 'pascal/';
 imgset  = [class, '_set_' num2str(setid)];
 annoDir = [baseDir, '/data/' imgset '/'];
@@ -17,13 +18,15 @@ for i = 1 : length(annoFiles)
         annos{i}.parts = parts;
     end
 end
-flowDir  = [baseDir '/results/' imgset '/dsp/'];
+flowDir  = [baseDir '/results/' imgset '/' method '/'];
 flowFile = [flowDir, 'pairflows.mat'];
 load(flowFile);
 
 params.metric = metric;
 params.alpha = 0.05;
 params.numImage = size(pairvx,1);
-params.imgHeight = size(pairvx{1,2},1);
-params.imgWidth = size(pairvx{1,2},2);
+params.height = size(pairvx{1,2},1);
+params.width = size(pairvx{1,2},2);
 res = evaluate(pairvx, pairvy, annos, params);
+fprintf('class = %s, setid = %d, method = %s, metric = %s, res = %f\n', ...
+    class, setid, method, metric, res);
