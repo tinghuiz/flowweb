@@ -35,8 +35,7 @@ for src = 1 : N
     for tgt = src+1 : N
         pcnt = pcnt + 1;
         if pcnt > 1
-            % FIXME: get number of backspace needed automatically
-            fprintf([repmat('\b',1,13) '%.6d/%.6d'], pcnt, (N^2 - N)/2);
+            fprintf('%.6d/%.6d', pcnt, (N^2 - N)/2);
         end
         transitCycleBound(:) = 0; 
         for hub = 1 : N
@@ -66,5 +65,9 @@ for src = 1 : N
             lambda * (transitReg - repmat(directReg, 1, N));
         [priorScores(:, s2t), maxTransitInds] = max(hubScores, [], 2);
         transits(:, s2t) = maxTransitInds;
+        if pcnt > 1
+            % FIXME: get number of backspace needed automatically
+            fprintf(repmat('\b',1,13));
+        end
     end
 end

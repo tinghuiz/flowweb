@@ -10,7 +10,10 @@ weights = exp(-dist/sigma);
 % FIXME: replace with bsxfun for speed up
 weights = weights ./ repmat(sum(weights, 2), [1, H*W]);
 weights = single(weights);
+% Only consider pixels within certain radius
 weights(weights < params.spatialWeightThresh) = 0;
+% Renormalize again
+weights = weights ./ repmat(sum(weights, 2), [1, H*W]);
 nbInds = cell(H*W, 1);
 nbWeights = cell(H*W,1);
 maxlen = 0;

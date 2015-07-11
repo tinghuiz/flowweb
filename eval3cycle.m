@@ -11,7 +11,7 @@ pairvy(pmask) = H + 9999;
 
 for src = 1 : N
     if src > 1
-        fprintf([repmat('\b',1,7) '%.3d/%.3d'], src, N);
+        fprintf('%.3d/%.3d', src, N);
     end
     for hub = 1 : N
         if src == hub
@@ -44,6 +44,10 @@ for src = 1 : N
             % image is different than that of the target image (needs to
             % calculate the correspondences, which makes the speed-up useless)
         end
+    end
+    if src > 1
+        % FIXME: get number of backspace needed automatically
+        fprintf(repmat('\b',1,7));
     end
 end
 fprintf('\n');

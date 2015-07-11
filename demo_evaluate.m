@@ -1,7 +1,7 @@
-% metric = 'keypoint';
-% class = 'car';
-% setid = 2;
-% method = 'dsp';
+metric = 'part';
+class = 'car';
+setid = 1;
+method = 'fweb';
 baseDir = 'pascal/';
 imgset  = [class, '_set_' num2str(setid)];
 annoDir = [baseDir, '/data/' imgset '/'];

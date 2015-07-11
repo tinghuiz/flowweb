@@ -6,5 +6,5 @@ vx2 = double(vx2)/width;
 vy2 = double(vy2)/height;
 f1 = [vx1(:), vy1(:)];
 f2 = [vx2(:), vy2(:)];
-D = sqrt(sum((f1 - f2).^2, 2));
+D = sum((f1 - f2).^2, 2);
 D = reshape(D, size(vx1));
