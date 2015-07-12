@@ -1,5 +1,6 @@
-% function to warp images with different dimensions
-function [warpI2,mask]=warpImage(im,vx,vy)
+function [warpI2,mask]=imgWarp(im,vx,vy)
+% Based on the warpImage function provided in the DSP code. The only
+% difference is in default masked values (0.6 vs. NaN).
 
 [height2,width2,nchannels]=size(im);
 [height1,width1]=size(vx);
@@ -14,7 +15,7 @@ YY=min(max(YY,1),height2);
 
 for i=1:nchannels
     foo=interp2(xx,yy,im(:,:,i),XX,YY,'bicubic');
-    foo(mask)=0.6;
+    foo(mask)=NaN;
     warpI2(:,:,i)=foo;
 end
 

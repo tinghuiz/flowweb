@@ -1,4 +1,4 @@
-function [pairvx, pairvy] = alignFlowWeb(pairvx, pairvy, params)
+function [pairvx, pairvy] = jointAlign(pairvx, pairvy, params)
 
 
 N = size(pairvx,1);
@@ -6,22 +6,24 @@ H = size(pairvx{1,2}, 1);
 W = size(pairvx{1,2}, 2);
 params.height = H;
 params.width = W;
+params.numImage = N;
 epsilon = params.cycleThresh * max([H, W]);
 [pairvx, pairvy] = flowCellToMat(pairvx, pairvy);
 [gx, gy] = meshgrid(1:W, 1:H);
 initvx = pairvx;
 initvy = pairvy;
 
-spatialWeights = pdist2([gx(:), gy(:)], [gx(:), gy(:)]);
+% Pre-compute spatial weights for the intra-image phase
+spatialWeights = slmetric_pw([gx(:), gy(:)]', [gx(:), gy(:)]', 'sqdist');
 spatialSigma = params.filterSpatialSigma * max([H, W]);
 spatialWeights = exp(-spatialWeights/spatialSigma);
 spatialWeights = single(spatialWeights);
+% FIXME: this thresholding necessary?
 spatialWeights(spatialWeights < 1e-3) = 0;
-% [nbInds, nbWeights] = setupSpatialFilter(params);
 
 iter = 1;
 while 1
-    %% Stage 1:
+    %% Inter-image phase:
     fprintf('Iter %d, Inter-image Phase:\n', iter);
     % 2-cycle check
     fprintf('Checking 2-cycles...\n');
@@ -48,13 +50,12 @@ while 1
     fprintf('Computing flow update priority...\n');
     [priorScores, transits] = priority(pairvx, pairvy, gx, gy, cycleSet,...
         initvx, initvy, params.lambda);
-    
     % Update flows
     fprintf('Updating ....\n');
-    [pairvx, pairvy] = updateflows(pairvx, pairvy, priorScores, transits,...
-        params);
+    [pairvx, pairvy] = updateflows(pairvx, pairvy, priorScores,...
+        transits, params);
 
-    %% Stage 2:
+    %% Intra-image phase:
     fprintf('Iter %d, Intra-image Phase:\n', iter);
     % 2-cycle check
     fprintf('Checking 2-cycles...\n');
@@ -67,7 +68,6 @@ while 1
     fprintf('Consistency-weighted filtering...\n');
     [pairvx, pairvy] = cyclefilter(pairvx, pairvy, cycleSet, ...
         spatialWeights, params, true);
-%     [pairvx, pairvy] = cyclefilter(pairvx, pairvy, cycleSet, nbInds, nbWeights, initvx, initvy, H, W, params);
     if params.saveEveryIter
         pvx = pairvx;
         pvy = pairvy;
@@ -80,7 +80,6 @@ while 1
         pairvx = pvx;
         pairvy = pvy;
     end
-    
     iter = iter + 1;
     if iter > params.maxIter
         break;

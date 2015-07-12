@@ -1,5 +1,21 @@
-function res = evaluate(pairvx, pairvy, annos, params)
+function res = evaluate(params)
 
+% Load annotations
+annoFiles = dir([params.annoDir, '*.mat']);
+annos = cell(1, length(annoFiles));
+for i = 1 : length(annoFiles)
+    load([params.annoDir, annoFiles(i).name]);
+    switch(params.metric)
+        case 'keypoint'
+            annos{i}.keypts = keypts;
+            annos{i}.keyptStatus = keypts_status;
+        case 'part'
+            annos{i}.parts = parts;
+    end
+end
+flowDir  = [params.resRoot, params.method '/'];
+flowFile = [flowDir, 'pairflows.mat'];
+load(flowFile);
 switch params.metric
     case 'keypoint'
         res = pck(pairvx, pairvy, annos, params);
@@ -64,7 +80,7 @@ for src = 1 : N
                         annos{src}.parts(sp).part_name)
                     tgtMask = annos{tgt}.parts(tp).mask;
                     srcMask = annos{src}.parts(sp).mask;
-                    [warpTgtMask, ~] = warpImage(single(tgtMask), ...
+                    [warpTgtMask, ~] = imgWarp(single(tgtMask), ...
                         single(pairvx{src, tgt}), ...
                         single(pairvy{src, tgt}));
                     warpTgtMask(isnan(warpTgtMask)) = 0;

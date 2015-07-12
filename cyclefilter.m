@@ -1,44 +1,51 @@
-function [vx, vy] = cyclefilter(vx, vy, cycle_set, ...
-    spatial_weights, params, is_gpu)
+function [pairvx, pairvy] = cyclefilter(pairvx, pairvy, cycleSet, ...
+    spatialWeights, params, is_gpu)
 
-N = sqrt(size(vx,2));
-cycle_map = int16(sum(cycle_set, 3));
+N = params.numImage;
+% Per-flow consistency score
+cycleMap = int16(sum(cycleSet, 3));
+% Number of flows to be filtered 
 numfilter = round(params.filterRate * params.width * params.height);
 
 if is_gpu
-    cycle_map = gpuArray(cycle_map);
-    spatial_weights = gpuArray(spatial_weights);
-    vx = gpuArray(vx);
-    vy = gpuArray(vy);
+    cycleMap = gpuArray(cycleMap);
+    spatialWeights = gpuArray(spatialWeights);
+    pairvx = gpuArray(pairvx);
+    pairvy = gpuArray(pairvy);
 else
-    vx = gather(vx);
-    vy = gather(vy);
-    spatial_weights = gather(spatial_weights);
+    pairvx = gather(pairvx);
+    pairvy = gather(pairvy);
+    spatialWeights = gather(spatialWeights);
 end
 
 for src = 1 : N
-    fprintf('filtering: %d/%d\n', src, N);
+    if src > 1
+        fprintf('%.3d/%.3d', src, N);
+    end
     for tgt = 1 : N
         if src == tgt
             continue;
         end
-        pid_st = src + (tgt - 1) * N;
-        [~, fidx] = mink(cycle_map(:, pid_st), numfilter);
-        
-        cycle_diff = bsxfun(@minus, cycle_map(:, pid_st)', ...
-           cycle_map(fidx, pid_st));
-        cycle_weights = exp(single(cycle_diff)/params.filterCycleSigma/(N-2));
-        cycle_weights(cycle_weights < 1) = 0;
-        weights_all = spatial_weights(fidx, :) .* cycle_weights;
-        weights_all = bsxfun(@times, weights_all, 1./sum(weights_all, 2));
-        vx(fidx, pid_st) = sum(bsxfun(@times, weights_all, vx(:, pid_st)'),2);
-        vy(fidx, pid_st) = sum(bsxfun(@times, weights_all, vy(:, pid_st)'),2);
+        s2t = src + (tgt - 1) * N;
+        [~, fidx] = mink(gather(cycleMap(:, s2t)), numfilter);
+        cycleDiff = bsxfun(@minus, cycleMap(:, s2t)', ...
+           cycleMap(fidx, s2t));
+        cycleWeights = exp(single(cycleDiff)/params.filterCycleSigma/(N-2));
+        cycleWeights(cycleWeights < 1) = 0;
+        weightsAll = spatialWeights(fidx, :) .* cycleWeights;
+        weightsAll = bsxfun(@times, weightsAll, 1./sum(weightsAll, 2));
+        pairvx(fidx, s2t) = sum(bsxfun(@times, weightsAll, pairvx(:, s2t)'),2);
+        pairvy(fidx, s2t) = sum(bsxfun(@times, weightsAll, pairvy(:, s2t)'),2);
+    end
+    if src > 1
+        % FIXME: get number of backspace needed automatically
+        fprintf(repmat('\b',1,7));
     end
 end
-vx = round(vx);
-vy = round(vy);
-vx = gather(vx);
-vy = gather(vy);
+pairvx = round(pairvx);
+pairvy = round(pairvy);
+pairvx = gather(pairvx);
+pairvy = gather(pairvy);
 
 % function [pairvx, pairvy] = cyclefilter(pairvx, pairvy, cycleSet, ...
 %     nbInds, nnW, initvx, initvy, height, width, params)
