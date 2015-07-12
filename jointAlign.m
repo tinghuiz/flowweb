@@ -39,7 +39,7 @@ while 1
     if iter > 1
         thisObj = obj;
         improvePercent = (thisObj - prevObj)/prevObj;
-        fprintf('Prev obj. = %.3f, this obj. = %.3f, improvement: %.3f\n',...
+        fprintf('Prev obj. = %.3f, this obj. = %.3f, relative improvement: %.3f\n',...
             prevObj, thisObj, improvePercent);
         if improvePercent < params.convergeThresh
             break;

@@ -1,6 +1,6 @@
 class = 'car';
 setid = 1;
-baseDir = 'pascal/';
+baseDir = 'pascal_toy/';
 initMethod = 'dsp';
 % The intra-image phase is GPU accelerated
 gpu = 1;

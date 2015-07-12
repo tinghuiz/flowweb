@@ -1,5 +1,6 @@
 function [pairvx, pairvy] = initflows(ims, initDir)
 
+fprintf('Initializing pairwise flows...\n');
 N = length(ims);
 
 if exist([initDir, 'pairflows.mat'], 'file')
@@ -23,7 +24,9 @@ else
         feats{i} = ExtractSIFT_WithPadding(ims{i}, [], 4);
     end
     for i = 1 : N
-        fprintf('Init progress: %d/%d\n', i, N);
+        if i > 1
+            fprintf('%.3d/%.3d', i, N);
+        end
         parfor j = 1 : N
             if i == j
                 continue;
@@ -31,6 +34,10 @@ else
             [pairvx{i,j}, pairvy{i,j}] = DSPMatch(feats{i}, feats{j});
             pairvx{i,j} = single(pairvx{i,j});
             pairvy{i,j} = single(pairvy{i,j});
+        end
+        if i > 1
+            % FIXME: get number of backspace needed automatically
+            fprintf(repmat('\b',1,7));
         end
     end
     save([initDir, 'pairflows.mat'], 'pairvx', 'pairvy');

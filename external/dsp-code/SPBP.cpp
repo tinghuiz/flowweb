@@ -61,7 +61,7 @@ void SPBP::RunBP(float* unary_potential, float deformation_coeff, float truncate
 		BackwardMessagePassing();
 		bool change = ComputeOptimalState();
 		if ( !change ) {
-			mexPrintf("iter: %d\n", i+1);
+			// mexPrintf("iter: %d\n", i+1);
 			break;
 		}
 	}
