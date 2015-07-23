@@ -22,9 +22,6 @@ metric = 'keypoint'; % can also be 'part'
 evalParams = [];
 evalParams.metric = metric;
 evalParams.alpha = 0.05;
-evalParams.numImage = length(ims);
-evalParams.height = size(ims{1},1);
-evalParams.width = size(ims{1},2);
 evalParams.resRoot = [baseDir '/results/' imgset '/'];
 evalParams.annoDir = imgDir;
 

@@ -11,16 +11,24 @@ for i = 1 : length(annoFiles)
             annos{i}.keyptStatus = keypts_status;
         case 'part'
             annos{i}.parts = parts;
+            annos{i}.mask  = mask;
     end
 end
 flowDir  = [params.resRoot, params.method '/'];
 flowFile = [flowDir, 'pairflows.mat'];
 load(flowFile);
+params.numImage = size(pairvx,1);
+params.height = size(pairvx{1,2},1);
+params.width = size(pairvx{1,2},2);
 switch params.metric
     case 'keypoint'
         res = pck(pairvx, pairvy, annos, params);
     case 'part'
-        res = partIOU(pairvx, pairvy, annos, params);
+        if ~isempty(annos{1}.parts)
+            res = partIOU(pairvx, pairvy, annos, params);
+        else
+            res = segmentIOU(pairvx, pairvy, annos, params);
+        end
 end
 
 function [pckMean, pckAll] = pck(pairvx, pairvy, annos, params)
@@ -63,11 +71,8 @@ pckMean = sum(pckAll(:))/pcnt;
 
 function [iouMean, iouAll] = partIOU(pairvx, pairvy, annos, params)
 N = params.numImage;
-W = params.width;
-H = params.height;
 iouAll = zeros(N, N);
 for src = 1 : N
-    fprintf('Eval parts: %d/%d\n', src, N);
     for tgt = 1 : N
         if src == tgt
             continue;
@@ -96,3 +101,25 @@ for src = 1 : N
     end
 end
 iouMean = sum(iouAll(:)) / (N^2 - N);
+
+function [iouMean, iouAll] = segmentIOU(pairvx, pairvy, annos, params)
+N = params.numImage;
+iouAll = zeros(N, N);
+for src = 1 : N
+    for tgt = 1 : N
+        if src == tgt
+            continue;
+        end
+        tgtMask = annos{tgt}.mask;
+        srcMask = annos{src}.mask;
+        [warpTgtMask, ~] = imgWarp(single(tgtMask), ...
+            single(pairvx{src, tgt}), ...
+            single(pairvy{src, tgt}));
+        warpTgtMask(isnan(warpTgtMask)) = 0;
+        warpTgtMask = imresize(warpTgtMask, size(srcMask), 'nearest');
+        union = sum(sum(warpTgtMask | srcMask));
+        inter = sum(sum(warpTgtMask & srcMask));
+        iouAll(src,tgt) = inter/union;
+    end
+end
+iouMean = sum(iouAll(:))/(N^2 - N);
