@@ -8,3 +8,8 @@ any particular purpose. However, feel free to contact me (tinghuiz at eecs dot b
 ## Running the Code
 
 Check out demo.m for how to run our joint alignment algorithm as well as the evaluation described in our CVPR paper.
+
+## CVPR experiments
+The PASCAL VOC data (images and annotations) used for producing results in Table 1 and 2 can be downloaded [here](http://www.eecs.berkeley.edu/~tinghuiz/data/pascal_data.tar.gz). The original data are collected from the [PASCAL3D+](http://cvgl.stanford.edu/projects/pascal3d.html) as well as the [PASCAL-Part](http://www.stat.ucla.edu/~xianjie.chen/pascal_part_dataset/pascal_part.html) datasets.
+
+Our alignment results on the above PASCAL VOC data are available [here](http://www.eecs.berkeley.edu/~tinghuiz/data/pascal_results.tar.gz).
